@@ -4,7 +4,6 @@ import scipy
 import matplotlib.pyplot as plt
 import seaborn as sns
 from IPython.display import display, Markdown
-from my_functions import *
 
 # Function for data generating process
 def generate_log_wages(n, μ=3, σ=1):
