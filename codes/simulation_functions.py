@@ -74,7 +74,7 @@ def calculate_statistics(log_wages):
 
 
 # Function to impose minimum wage (generalized) with log_wages as input
-def impose_minimum_wage_generalized(log_wages, m, P_o, P_b, P_s):
+def impose_minimum_wage(log_wages, m, P_o, P_b, P_s):
     # Sanity check
     if P_o + P_b + P_s > 1.0:
         raise ValueError("The sum of probabilities P_o, P_b, and P_s must be less than or equal to 1.")
@@ -106,6 +106,28 @@ def impose_minimum_wage_generalized(log_wages, m, P_o, P_b, P_s):
     assert np.all((df.loc[df['affected'], 'adjusted_log_wages'] >= m) | np.isnan(df.loc[df['affected'], 'adjusted_log_wages'])), "Sanity check failed: adjusted log wages are below minimum wage for affected wages."
 
     return df
+
+def calculate_elasticity(raw_wages, m_before, m_after, P_o=0.2, P_b=0, P_s=0.5):
+    
+    kargs = (P_o, P_b, P_s)
+
+    df_pre = impose_minimum_wage(raw_wages, m_before, *kargs)
+    df_post = impose_minimum_wage(raw_wages, m_after, *kargs)
+    # Calculate the number of "employed" and earn below m_after
+    n_pre = sum(~np.isnan(df_pre['adjusted_log_wages']))
+    n_post = sum(~np.isnan(df_post['adjusted_log_wages']))
+    Δe = n_post-n_pre
+    n_directly_affected = sum((df_pre['adjusted_log_wages'] < m_after))
+    
+    Δm = np.exp(m_after) - np.exp(m_before)
+    # Calculate the elasticity
+    local_elasticity = (Δe/n_directly_affected) / (Δm/np.exp(m_before))
+    global_elasticity = (Δe/n_pre) / (Δm/np.exp(m_before))
+
+    return local_elasticity, global_elasticity
+
+# test
+# calculate_elasticity(initial_log_wages, 2.2, 2.4)
 
 # Visualization
 # Function to plot a single histogram in a panel
