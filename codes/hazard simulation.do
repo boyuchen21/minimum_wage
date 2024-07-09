@@ -6,6 +6,7 @@ putexcel set tables/ols_coefficients.xlsx, replace
 putexcel set tables/lpm_coefficients.xlsx, replace
 
 foreach s in S1 S2 S3 S4{
+quietly{
     
 	di "Run GLM for scenario `s'"
 	use data/df_grouped_`s'.dta, clear
@@ -82,4 +83,5 @@ foreach s in S1 S2 S3 S4{
     putexcel B4 = matrix(se)
 	putexcel A3 = "coef"
 	putexcel A4 = "se"
+	}
 }
