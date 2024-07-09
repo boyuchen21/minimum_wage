@@ -6,12 +6,13 @@ putexcel set tables/ols_coefficients.xlsx, replace
 putexcel set tables/lpm_coefficients.xlsx, replace
 
 foreach s in S1 S2 S3 S4{
-quietly{
+// quietly{
     
 	di "Run GLM for scenario `s'"
 	use data/df_grouped_`s'.dta, clear
-
-	glm fweight min min6b min35b min12b min12a min35a min610a min1115a min1620a bin* if remain>0 & wagcat~=163 & wagcat ~= 0, link(cloglog) family(binomial remain) 
+	drop min_bin rel_min_bin min_sum
+	
+	glm fweight min* bin* if remain>0 & wagcat ~= 0, link(cloglog) family(binomial remain) 
 	
     * Extract the coefficients
     matrix b = e(b)
@@ -35,7 +36,7 @@ quietly{
 	putexcel A3 = "coef"
 	putexcel A4 = "se"
 	
-	reg cloglog_hazard min min6b min35b min12b min12a min35a min610a min1115a min1620a bin* if remain>0 & wagcat ~= 0 & wagcat ~= 163
+	reg cloglog_hazard min* bin* if remain>0 & wagcat ~= 0
 	
     * Extract the coefficients
     matrix b = e(b)
@@ -60,7 +61,7 @@ quietly{
 	putexcel A4 = "se"
 	
 
-	reg hazard min min6b min35b min12b min12a min35a min610a min1115a min1620a bin* if remain>0 & wagcat ~= 0 & wagcat ~= 163
+/*	reg hazard min min6b min35b min12b min12a min35a min610a min1115a min1620a bin* if remain>0 & wagcat ~= 0 & wagcat ~= 163
 	
     * Extract the coefficients
     matrix b = e(b)
@@ -83,5 +84,6 @@ quietly{
     putexcel B4 = matrix(se)
 	putexcel A3 = "coef"
 	putexcel A4 = "se"
-	}
+	*/
+// 	}
 }
