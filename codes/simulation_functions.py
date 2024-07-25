@@ -31,7 +31,7 @@ def calculate_statistics(log_wages):
 
 # Function to impose minimum wage (generalized) with log_wages as input
 def impose_minimum_wage(log_wages, real_m, P_o, P_b, P_s):
-    if real_m >= 0:    
+    if real_m > 0:    
         m = np.log(real_m)
     else:
         m = np.log(1e-10)
