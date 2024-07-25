@@ -11,49 +11,6 @@ def generate_log_wages(n, μ=3, σ=1):
     # convert into log wages
     return np.log(wages)
 
-# test
-# generate_log_wages(10)
-
-# Function to impose minimum wage (vectorized) with log_wages as input
-def impose_minimum_wage(log_wages, m, P_o, P_b, P_s):
-    # Sanity check
-    if not np.isclose(P_o + P_b + P_s, 1.0):
-        raise ValueError("The probabilities P_o, P_b, and P_s must sum up to 1.")
-
-    original_log_wages = log_wages.copy()
-    below_m = log_wages < m
-    random_probs = np.random.rand(len(log_wages))
-    affected = np.zeros(len(log_wages), dtype=bool)
-
-    # Apply the probabilities in a vectorized manner
-    log_wages = np.where((below_m) & (random_probs < P_o), np.nan, log_wages)  # Unemployed (log_wage = np.nan)
-    log_wages = np.where((below_m) & (random_probs >= P_o) & (random_probs < P_o + P_b), m, log_wages)  # Bunching to minimum wage
-    spillover_mask = (below_m) & (random_probs >= P_o + P_b)
-    log_wages[spillover_mask] = m + np.random.exponential(scale=0.1, size=np.sum(spillover_mask))  # Bunching with spillover
-
-    # Mark affected rows
-    affected[below_m] = True
-
-    # Create the DataFrame
-    df = pd.DataFrame({
-        'original_log_wages': original_log_wages,
-        'adjusted_log_wages': log_wages,
-        'affected': affected
-    })
-
-    # Sanity checks
-    ## original log wages should not be affected if above minimum wage
-    assert np.all(df.loc[~below_m, 'original_log_wages'] == df.loc[~below_m, 'adjusted_log_wages']), "Sanity check failed: original and adjusted log wages do not match for unaffected wages."
-    ## affected log wages should be above minimum wage (or np.nan) after adjustment
-    assert df[df['adjusted_log_wages'] < m].shape[0] == 0, "Sanity check failed: affected log wages are below minimum wage after adjustment."
-    # assert np.all(df.loc[df['affected'], 'adjusted_log_wages'] >= m), "Sanity check failed: affected log wages are below minimum wage after adjustment."
-
-    return df
-
-# test
-# m = 2.3
-# impose_minimum_wage(generate_log_wages(10000), m, 0.1, 0.2, 0.7)
-
 # Function to calculate statistics
 def calculate_statistics(log_wages):
     employed = np.isnan(log_wages) == False
@@ -72,9 +29,12 @@ def calculate_statistics(log_wages):
 # test
 # calculate_statistics(impose_minimum_wage(generate_log_wages(10000), m, 0.1, 0.2, 0.7)['adjusted_log_wages'])
 
-
 # Function to impose minimum wage (generalized) with log_wages as input
-def impose_minimum_wage(log_wages, m, P_o, P_b, P_s):
+def impose_minimum_wage(log_wages, real_m, P_o, P_b, P_s):
+    if real_m >= 0:    
+        m = np.log(real_m)
+    else:
+        m = np.log(1e-10)
     # Sanity check
     if P_o + P_b + P_s > 1.0:
         raise ValueError("The sum of probabilities P_o, P_b, and P_s must be less than or equal to 1.")
