@@ -36,6 +36,7 @@ quietly{
 	putexcel A3 = "coef"
 	putexcel A4 = "se"
 	
+	/*
 	reg cloglog_hazard min* bin* if remain>0 & wagcat ~= 0
 	
     * Extract the coefficients
@@ -59,7 +60,7 @@ quietly{
     putexcel B4 = matrix(se)
 	putexcel A3 = "coef"
 	putexcel A4 = "se"
-	
+*/	
 
 /*	reg hazard min min6b min35b min12b min12a min35a min610a min1115a min1620a bin* if remain>0 & wagcat ~= 0 & wagcat ~= 163
 	
