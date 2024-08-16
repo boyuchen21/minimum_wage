@@ -1,11 +1,13 @@
 cd "/Users/boyuchen/Documents/UBC/RA/minimum_wage"
 
+local scenarios `1'
+
 * Clear the existing Excel file or create a new one
 putexcel set tables/glm_coefficients.xlsx, replace
 putexcel set tables/ols_coefficients.xlsx, replace
 putexcel set tables/lpm_coefficients.xlsx, replace
 
-foreach s in S1 S2 S3 S4 S5 S6 S7 S8{
+foreach s in `scenarios'{
 quietly{
     
 	di "Run GLM for scenario `s'"
