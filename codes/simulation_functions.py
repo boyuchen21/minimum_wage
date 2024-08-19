@@ -123,7 +123,7 @@ def calculate_elasticity(raw_wages, m_before, m_after, P_o=0.2, P_b=0, P_s=0.5):
 
 # Visualization
 # Function to plot a single histogram in a panel
-def plot_histogram_panel(ax, df, bins, scenario, scenario_params, max_ylim, show_unemployed=False):
+def plot_histogram_panel(ax, df, bins, scenario, scenario_params, max_ylim, show_unemployed=False, show_percentile=True):
     original_log_wages = df['original_log_wages']
     adjusted_log_wages = df['adjusted_log_wages']
     affected = df['affected']
@@ -146,31 +146,32 @@ def plot_histogram_panel(ax, df, bins, scenario, scenario_params, max_ylim, show
     ax.hist([unaffected_log_wages[~np.isnan(unaffected_log_wages)], affected_log_wages[~np.isnan(affected_log_wages)]], 
             bins=bins, alpha=0.7, label=['Unaffected', 'Affected'], color=[palette[6], palette[5]], stacked=True)
     
-    ax.axvline(m, color='darkgrey', linestyle='--', label='Minimum wage')
-    ax.axvline(median_log_wage, color=palette[0], linestyle='-', label='Median log wage')
-    ax.axvline(mean_log_wage, color=palette[1], linestyle='-', label='Mean log wage')
+    ax.axvline(np.log(m), color='darkgrey', linestyle='--', label='Minimum wage')
     # add 5, 15, 25 percentile line
-    ax.axvline(percentile_5, color=palette[2], linestyle='-', label='5th percentile')
-    ax.axvline(percentile_15, color=palette[5], linestyle='-', label='15th percentile')
-    ax.axvline(percentile_25, color=palette[6], linestyle='-', label='25th percentile')
+    if show_percentile:
+        ax.axvline(median_log_wage, color=palette[0], linestyle='-', label='Median log wage')
+        ax.axvline(mean_log_wage, color=palette[1], linestyle='-', label='Mean log wage')
+        ax.axvline(percentile_5, color=palette[2], linestyle='-', label='5th percentile')
+        ax.axvline(percentile_15, color=palette[5], linestyle='-', label='15th percentile')
+        ax.axvline(percentile_25, color=palette[6], linestyle='-', label='25th percentile')
 
-    # add value of median to the left of median, and mean to the right of mean
-    ax.text(median_log_wage-0.5, max_ylim*0.8, f'{median_log_wage:.2f}', color=palette[0])
-    ax.text(mean_log_wage+0.1, max_ylim*0.8, f'{mean_log_wage:.2f}', color=palette[1])
+        # add value of median to the left of median, and mean to the right of mean
+        ax.text(median_log_wage-0.5, max_ylim*0.8, f'{median_log_wage:.2f}', color=palette[0])
+        ax.text(mean_log_wage+0.1, max_ylim*0.8, f'{mean_log_wage:.2f}', color=palette[1])
 
-    # add a box on the right bottom of each panel to show the value of 5, 10, 15, 20, 25 percentile
-    xplace = 0.3
-    ax.text(xplace, max_ylim*0.8, f'$p_{{5}}$: {percentile_5:.2f}', color='black')
-    ax.text(xplace, max_ylim*0.73, f'$p_{{10}}$: {percentile_10:.2f}', color='black')
-    ax.text(xplace, max_ylim*0.66, f'$p_{{15}}$: {percentile_15:.2f}', color='black')
-    ax.text(xplace, max_ylim*0.59, f'$p_{{20}}$: {percentile_20:.2f}', color='black')
-    ax.text(xplace, max_ylim*0.52, f'$p_{{25}}$: {percentile_25:.2f}', color='black')
+        # add a box on the right bottom of each panel to show the value of 5, 10, 15, 20, 25 percentile
+        xplace = 0.3
+        ax.text(xplace, max_ylim*0.8, f'$p_{{5}}$: {percentile_5:.2f}', color='black')
+        ax.text(xplace, max_ylim*0.73, f'$p_{{10}}$: {percentile_10:.2f}', color='black')
+        ax.text(xplace, max_ylim*0.66, f'$p_{{15}}$: {percentile_15:.2f}', color='black')
+        ax.text(xplace, max_ylim*0.59, f'$p_{{20}}$: {percentile_20:.2f}', color='black')
+        ax.text(xplace, max_ylim*0.52, f'$p_{{25}}$: {percentile_25:.2f}', color='black')
 
     # add unemployment rate on the middle left of the plot. make a line skip between text and numbers
     if show_unemployed:
         ax.text(0.3, max_ylim*0.3, 'unemp. rate:', color='black')
         ax.text(0.3, max_ylim*0.22, f'{100*unemployment_rate:.2f}%', color='black')
-        
+    
     ax.set_title(f'{scenario} ($m$ = {m}, $P_o$={scenario_params[1]}, $P_b$={scenario_params[2]}, $P_s$={scenario_params[3]})')
     ax.set_xlabel('Log Wage')
     ax.set_ylabel('Frequency')
