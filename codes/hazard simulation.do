@@ -14,7 +14,10 @@ quietly{
 	use data/df_grouped_`s'.dta, clear
 	drop min_bin rel_min_bin min_sum
 	
-	glm fweight min* bin* if remain>0 & wagcat ~= 0, link(cloglog) family(binomial remain) 
+	su wagcat
+	local maxbin = `r(max)'
+	
+	glm fweight min* bin* if remain>0 & wagcat ~= 0 & wagcat ~=  `maxbin', link(cloglog) family(binomial remain) 
 	
     * Extract the coefficients
     matrix b = e(b)

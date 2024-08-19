@@ -4,10 +4,12 @@ import scipy
 import matplotlib.pyplot as plt
 import seaborn as sns
 from IPython.display import display, Markdown
+from scipy.stats import gaussian_kde
 
 # Function for data generating process
 def generate_log_wages(n, μ=3, σ=1):
     wages = np.random.lognormal(mean=μ, sigma=σ, size=n)
+    
     # convert into log wages
     return np.log(wages)
 
@@ -26,30 +28,59 @@ def calculate_statistics(log_wages):
 
     return median_log_wage, mean_log_wage, unemployment_rate, percentile_5, percentile_10, percentile_15, percentile_20, percentile_25
 
-# test
+def generate_weighted_exponential_samples(log_wages, real_m, num_samples, scale=0.5):
+    log_m = np.log(real_m)
+    # Generate raw exponential samples
+    raw_samples = log_m + np.random.exponential(scale=scale, size=3_000)
+    # Calculate the KDE of log_wages
+    kde = gaussian_kde(log_wages)
+    # Assign weights to each point in raw_samples based on the KDE of log_wages
+    weights = kde(raw_samples)
+    # Normalize the weights
+    weights /= np.sum(weights)
+    # Resample using the exponential samples and apply the weights
+    resampled_with_weights = np.random.choice(raw_samples, size=num_samples, p=weights)
+    
+    return resampled_with_weights
+
 # calculate_statistics(impose_minimum_wage(generate_log_wages(10000), m, 0.1, 0.2, 0.7)['adjusted_log_wages'])
 
 # Function to impose minimum wage (generalized) with log_wages as input
-def impose_minimum_wage(log_wages, real_m, P_o, P_b, P_s):
+def impose_minimum_wage(log_wages, real_m, P_o, P_b, P_s, spillover="exponential", spillover_scale=0.1):
     if real_m > 0:    
-        m = np.log(real_m)
+        log_m = np.log(real_m)
     else:
-        m = np.log(1e-10)
+        log_m = np.log(1e-10)
     # Sanity check
     if P_o + P_b + P_s > 1.0:
         raise ValueError("The sum of probabilities P_o, P_b, and P_s must be less than or equal to 1.")
 
     original_log_wages = log_wages.copy()
-    below_m = log_wages < m
+    below_m = log_wages < log_m
     random_probs = np.random.rand(len(log_wages))
     affected = np.zeros(len(log_wages), dtype=bool)
 
     # Apply the probabilities in a vectorized manner
     unaffected_mask = (below_m) & (random_probs >= P_o + P_b + P_s)
-    log_wages = np.where((below_m) & (random_probs < P_o), np.nan, log_wages)  # Unemployed (log_wage = np.nan)
-    log_wages = np.where((below_m) & (random_probs >= P_o) & (random_probs < P_o + P_b), m, log_wages)  # Bunching to minimum wage
     spillover_mask = (below_m) & (random_probs >= P_o + P_b) & (random_probs < P_o + P_b + P_s)
-    log_wages[spillover_mask] = m + np.random.exponential(scale=0.1, size=np.sum(spillover_mask))  # Bunching with spillover
+    bunching_mask = (below_m) & (random_probs >= P_o) & (random_probs < P_o + P_b)
+    unemploy_mask = (below_m) & (random_probs < P_o)
+
+    # Check if the sum of all masks equals below_m
+    all_masks_sum = unaffected_mask + spillover_mask + unemploy_mask + bunching_mask
+    if not np.array_equal(all_masks_sum, below_m):
+        raise ValueError("The masks are either overlapping or do not cover all elements of below_m.")
+
+    log_wages[unemploy_mask] = np.nan  # Unemployment
+    log_wages[bunching_mask] = log_m  # Bunching to minimum wage
+    # Generate spillover samples
+    num_samples = np.sum(spillover_mask)
+    if spillover == "exponential":
+        log_wages[spillover_mask] = log_m + np.random.exponential(scale=spillover_scale, size=num_samples)  # Bunching with spillover
+    elif spillover == "proportional_exponential":
+        log_wages[spillover_mask] = generate_weighted_exponential_samples(original_log_wages.copy(), real_m, num_samples, scale=spillover_scale)
+    else:
+        raise ValueError("Invalid spillover method. Choose from 'exponential' or 'proportional_exponential'.")
 
     # Mark affected rows
     affected = below_m & ~unaffected_mask
@@ -63,9 +94,10 @@ def impose_minimum_wage(log_wages, real_m, P_o, P_b, P_s):
     })
 
     # Sanity check: if affected, adjusted log wages should be >= m or NaN
-    assert np.all((df.loc[df['affected'], 'adjusted_log_wages'] >= m) | np.isnan(df.loc[df['affected'], 'adjusted_log_wages'])), "Sanity check failed: adjusted log wages are below minimum wage for affected wages."
+    assert np.all((df.loc[df['affected'], 'adjusted_log_wages'] >= log_m) | np.isnan(df.loc[df['affected'], 'adjusted_log_wages'])), "Sanity check failed: adjusted log wages are below minimum wage for affected wages."
 
     return df
+
 
 def calculate_elasticity(raw_wages, m_before, m_after, P_o=0.2, P_b=0, P_s=0.5):
     
