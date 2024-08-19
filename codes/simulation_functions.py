@@ -121,14 +121,13 @@ def calculate_elasticity(raw_wages, m_before, m_after, P_o=0.2, P_b=0, P_s=0.5):
 # test
 # calculate_elasticity(initial_log_wages, 2.2, 2.4)
 
-# Visualization
-# Function to plot a single histogram in a panel
 def plot_histogram_panel(ax, df, bins, scenario, scenario_params, max_ylim, show_unemployed=False, show_percentile=True):
     original_log_wages = df['original_log_wages']
     adjusted_log_wages = df['adjusted_log_wages']
     affected = df['affected']
 
     m = scenario_params[0]
+    log_m = np.log(m)
 
     affected_log_wages = adjusted_log_wages[affected]
     unaffected_log_wages = adjusted_log_wages[~affected]
@@ -139,6 +138,11 @@ def plot_histogram_panel(ax, df, bins, scenario, scenario_params, max_ylim, show
     # Get the Spectral color palette
     palette = sns.color_palette("Spectral", 7)
 
+    # Adjust bins so that np.log(m) is on the boundary
+    bin_width = 0.1
+    bin_start = log_m - (np.floor(log_m / bin_width) * bin_width)
+    bins = np.arange(bin_start, 7 + bin_width, bin_width) - 1e-6
+
     # Plot original log wages in the background
     ax.hist(original_log_wages[~np.isnan(original_log_wages)], bins=bins, alpha=0.2, label='Original', color=palette[6])
 
@@ -146,7 +150,7 @@ def plot_histogram_panel(ax, df, bins, scenario, scenario_params, max_ylim, show
     ax.hist([unaffected_log_wages[~np.isnan(unaffected_log_wages)], affected_log_wages[~np.isnan(affected_log_wages)]], 
             bins=bins, alpha=0.7, label=['Unaffected', 'Affected'], color=[palette[6], palette[5]], stacked=True)
     
-    ax.axvline(np.log(m), color='darkgrey', linestyle='--', label='Minimum wage')
+    ax.axvline(log_m, color='darkgrey', linestyle='--', label='Minimum wage')
     # add 5, 15, 25 percentile line
     if show_percentile:
         ax.axvline(median_log_wage, color=palette[0], linestyle='-', label='Median log wage')
@@ -172,12 +176,13 @@ def plot_histogram_panel(ax, df, bins, scenario, scenario_params, max_ylim, show
         ax.text(0.3, max_ylim*0.3, 'unemp. rate:', color='black')
         ax.text(0.3, max_ylim*0.22, f'{100*unemployment_rate:.2f}%', color='black')
     
-    ax.set_title(f'{scenario} ($m$ = {m}, $P_o$={scenario_params[1]}, $P_b$={scenario_params[2]}, $P_s$={scenario_params[3]})')
+    ax.set_title(f'{scenario} ($m$ = {int(m)}, $P_o$={scenario_params[1]}, $P_b$={scenario_params[2]}, $P_s$={scenario_params[3]})')
     ax.set_xlabel('Log Wage')
     ax.set_ylabel('Frequency')
     ax.set_xlim(0, 7)  # Set xlim to a fixed range
     ax.set_ylim(0, max_ylim)  # Adjust ylim to show the whole histogram
     ax.legend()
+
 
 
 # Main function to plot histograms for all scenarios # this function for same m only
