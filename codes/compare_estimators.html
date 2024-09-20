@@ -7527,6 +7527,27 @@ a.anchor-link {
 </div>
 <div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
 </div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput" data-mime-type="text/markdown">
+<p><strong>Updates on Sep 20:</strong></p>
+<ol>
+<li>output <code>hazard_baseline_coefficient.csv</code> (baseline means the version without interaction terms yet.)</li>
+<li>generated "effect on density figures.</li>
+<li>fixed the issue that wages are not correctly assigned to bins around the minimum wages.</li>
+<li>updated model specification.</li>
+</ol>
+<p><strong>Next Steps:</strong></p>
+<ol>
+<li>report hazard with minimum wage value x dummies interaction term.</li>
+</ol>
+</div>
+</div>
+</div>
+</div>
+<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell">
+<div class="jp-Cell-inputWrapper" tabindex="0">
+<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
+</div>
+<div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
+</div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput" data-mime-type="text/markdown">
 <h2 id="Part-0:-Model-Setup">Part 0: Model Setup<a class="anchor-link" href="#Part-0:-Model-Setup">¶</a></h2>
 </div>
 </div>
@@ -8357,8 +8378,7 @@ $$</p>
 </div>
 <div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
 </div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput" data-mime-type="text/markdown">
-<p>Save the regression input data <code>cengiz_data_all_scenarios.csv</code>:</p>
-<p>The data contains the input for Cengiz regression. Each row represents a wage bin in a period, and a scenario. You can ignore this file if you’re not going to rerun the regression.</p>
+<h5 id="Data-Description-for-cengiz_data_all_scenarios.csv:">Data Description for <code>cengiz_data_all_scenarios.csv</code>:<a class="anchor-link" href="#Data-Description-for-cengiz_data_all_scenarios.csv:">¶</a></h5><p>The data contains the input for Cengiz regression. Each row represents a wage bin in a period, and a scenario. You can ignore this file if you’re not going to rerun the regression.</p>
 <ul>
 <li><code>scenario</code>: the name of the scenario</li>
 <li><code>scenario_values</code>: set of minimum wage, $p_o, p_b, p_s$.<ul>
@@ -8464,7 +8484,7 @@ normalized_emp</li>
 </div>
 <div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
 </div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput" data-mime-type="text/markdown">
-<h5 id="Data-Description-for-all_coefs_df">Data Description for <code>all_coefs_df</code><a class="anchor-link" href="#Data-Description-for-all_coefs_df">¶</a></h5><p>The dataset contains the regression results for the Cengiz regression, which are used to generate result figures. The data includes the estimated coefficients for the minimum wage dummies, along with other relevant metrics such as standard errors and relative positions to the minimum wage.</p>
+<h5 id="Data-Description-for-cengiz_coefficients.csv">Data Description for <code>cengiz_coefficients.csv</code><a class="anchor-link" href="#Data-Description-for-cengiz_coefficients.csv">¶</a></h5><p>The dataset contains the regression results for the Cengiz regression, which are used to generate result figures. The data includes the estimated coefficients for the minimum wage dummies, along with other relevant metrics such as standard errors and relative positions to the minimum wage.</p>
 <p><strong>Columns:</strong></p>
 <ol>
 <li><p><strong>index</strong>: The name of the minimum wage dummy. This indicates the specific wage bin relative to the minimum wage.</p>
@@ -8525,7 +8545,7 @@ normalized_emp</li>
 </div>
 <div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
 </div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput" data-mime-type="text/markdown">
-<p>I first prepare the data and variables following the definition that Thomas gave me.</p>
+<p>I first prepare the data and variables following the definition that Thomas gave me. <code>min21b</code> is 1 for all bins below $2.1 to the minimum wage.</p>
 </div>
 </div>
 </div>
@@ -8672,17 +8692,6 @@ normalized_emp</li>
 </div>
 </div>
 </div>
-</div>
-<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell">
-<div class="jp-Cell-inputWrapper" tabindex="0">
-<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
-</div>
-<div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
-</div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput" data-mime-type="text/markdown">
-<p>Create data for four scenarios.</p>
-</div>
-</div>
-</div>
 </div><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs">
 <div class="jp-Cell-inputWrapper" tabindex="0">
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
@@ -8742,6 +8751,17 @@ normalized_emp</li>
     <span class="k">return</span> <span class="n">glm_result</span>
 </pre></div>
 </div>
+</div>
+</div>
+</div>
+</div>
+<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell">
+<div class="jp-Cell-inputWrapper" tabindex="0">
+<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
+</div>
+<div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
+</div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput" data-mime-type="text/markdown">
+<p>Call STATA and run the regression for the scenarios.</p>
 </div>
 </div>
 </div>
@@ -8938,7 +8958,7 @@ end of do-file
 <h5 id="Data-Description-for-hazard_baseline_coefficients.csv">Data Description for <code>hazard_baseline_coefficients.csv</code><a class="anchor-link" href="#Data-Description-for-hazard_baseline_coefficients.csv">¶</a></h5><p>This dataset contains the results of the hazard estimation under six scenarios, specifically showing the relationship between wage variables and their corresponding coefficients, standard errors, and relative wage intervals. The data includes information on the impact of minimum wage adjustments at different levels.</p>
 <p><strong>Columns:</strong></p>
 <ol>
-<li><p><strong>Index</strong>: The name of the wage category or minimum wage bin. Each variable refers to a specific wage range below or above the minimum wage.</p>
+<li><p><strong>index</strong>: The name of the wage category or minimum wage bin. Each variable refers to a specific wage range below or above the minimum wage.</p>
 <ul>
 <li>Example values: <code>min</code>, <code>min610b</code>, <code>min1115a</code></li>
 </ul>
@@ -8975,12 +8995,8 @@ end of do-file
 </li>
 </ol>
 <h4 id="Notes:">Notes:<a class="anchor-link" href="#Notes:">¶</a></h4><ul>
-<li><strong>Variable Names</strong>: The wage bins are structured as <code>min</code>, <code>min[n]a</code>, or <code>min[n]b</code>. Variables ending in <code>a</code> refer to bins above the minimum wage, while those ending in <code>b</code> refer to bins below the minimum wage.</li>
-<li><strong>Bounds Interpretation</strong>: The <code>rel_dollar_lower_bound</code> and <code>rel_dollar_upper_bound</code> indicate the dollar range relative to the minimum wage. For example, <code>min610b</code> has bounds of <code>[-1.0, -0.5]</code>, meaning it includes wages that are between $0.50 and $1.00 below the minimum wage. If the lower bound is <code>-inf</code>, it refers to all wages below a certain threshold.</li>
-<li><strong>Scenarios</strong>: Each scenario (e.g., S1, S6) corresponds to different assumptions about how the minimum wage is adjusted or imposed in the model. The exact details of each scenario depend on the policy assumptions used during the analysis.</li>
+<li><strong>Bounds Interpretation</strong>: Since the width of dummies varies, instead of providing the relative dollar from the lower bound to the minimum wage, I provided both the lower and upper bound of bins. The <code>rel_dollar_lower_bound</code> and <code>rel_dollar_upper_bound</code> indicate the dollar range relative to the minimum wage. For example, <code>min610b</code> has bounds of <code>[-1.0, -0.5]</code>, meaning it includes wages that are between $0.50 and $1.00 below the minimum wage. If the lower bound is <code>-inf</code>, it refers to all wages below a certain threshold.</li>
 </ul>
-<p>This dataset can be used to analyze the differential effects of various minimum wage policies on wage distributions across multiple time periods and wage bins.
-he analysis.</p>
 </div>
 </div>
 </div>
@@ -9016,8 +9032,8 @@ he analysis.</p>
     <span class="s1">'SE'</span><span class="p">:</span> <span class="s1">'std_errors'</span><span class="p">,</span>
     <span class="s1">'lower_bound'</span><span class="p">:</span> <span class="s1">'rel_dollar_lower_bound'</span><span class="p">,</span>
     <span class="s1">'upper_bound'</span><span class="p">:</span> <span class="s1">'rel_dollar_upper_bound'</span><span class="p">,</span>
-    <span class="s1">'scenario_value'</span><span class="p">:</span> <span class="s1">'scenario_values'</span><span class="p">,</span>
     <span class="s1">'Scenario'</span><span class="p">:</span> <span class="s1">'scenario_name'</span>
+    <span class="s1">'scenario_value'</span><span class="p">:</span> <span class="s1">'scenario_values'</span><span class="p">,</span>
 <span class="p">})</span>
 
 <span class="n">renamed_df</span><span class="o">.</span><span class="n">to_csv</span><span class="p">(</span><span class="s1">'data/hazard_baseline_coefficients.csv'</span><span class="p">,</span> <span class="n">index</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
