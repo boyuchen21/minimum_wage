@@ -183,8 +183,6 @@ def plot_histogram_panel(ax, df, bins, scenario, scenario_params, max_ylim, show
     ax.set_ylim(0, max_ylim)  # Adjust ylim to show the whole histogram
     ax.legend()
 
-
-
 # Main function to plot histograms for all scenarios # this function for same m only
 def plot_wage_distributions(df_scenarios, scenario_params, max_ylim, show_unemployed):
     fig, axs = plt.subplots(2, 2, figsize=(12, 8))
